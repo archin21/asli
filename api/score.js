@@ -3,7 +3,7 @@
 // stores the full exchange in Supabase, and returns the result.
 import { MAX_REQUESTS_PER_VISITOR, countForVisitor, env, supabase } from './_lib.js';
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
 const MAX_OUTPUT_TOKENS = 300;
 const CATEGORIES = ['Laundry detergent', 'Dishwash', 'Floor cleaner', 'Hand wash', 'Body wash', 'Shampoo', 'Other household / personal care'];
 const CRITERIA = ['Claim integrity', 'Plastic per use', 'Cost per use', 'Switch friction'];
@@ -88,6 +88,7 @@ export default async function handler(req, res) {
           generationConfig: {
             temperature: 0.2,
             maxOutputTokens: MAX_OUTPUT_TOKENS,
+            thinkingConfig: { thinkingLevel: 'minimal' }, // keep the 300-token budget for the answer
             responseMimeType: 'application/json',
             responseSchema: RESPONSE_SCHEMA,
           },
