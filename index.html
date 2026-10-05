@@ -143,6 +143,39 @@
   .try h2 { font-size: clamp(30px, 4vw, 44px); font-weight: 800; margin-bottom: 12px; }
   .try p { color: var(--muted); max-width: 560px; margin: 0 auto 26px; }
 
+  /* Live checker (Task 4) */
+  .checker { display: grid; grid-template-columns: 1.3fr 1fr 1fr auto; gap: 12px; align-items: end; text-align: left; max-width: 980px; margin: 0 auto; }
+  .checker label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .checker input, .checker select { font: inherit; font-size: 16px; padding: 13px 14px; border: 2px solid var(--ink); border-radius: 12px; background: var(--paper); color: var(--ink); width: 100%; }
+  .checker input:focus, .checker select:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+  .checker .btn { cursor: pointer; font-family: inherit; }
+  .checker .btn:disabled { opacity: .6; cursor: wait; transform: none; }
+  .quota { font-size: 14px; margin: 14px auto 0 !important; }
+  .result { text-align: left; max-width: 760px; margin: 28px auto 0; background: var(--paper); border: 2px solid var(--ink); border-radius: var(--radius); padding: 24px; box-shadow: 6px 6px 0 var(--ink); }
+  .result .head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; border-bottom: 1px dashed var(--line); padding-bottom: 12px; margin-bottom: 8px; }
+  .result .head h3 { font-size: 22px; }
+  .result .row { display: grid; grid-template-columns: 150px 92px 1fr auto; gap: 12px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .result .row:last-of-type { border-bottom: 0; }
+  .dots { letter-spacing: 3px; color: var(--accent); font-size: 15px; white-space: nowrap; }
+  .dots .off { color: var(--line); }
+  .result .tip { margin-top: 14px; background: var(--accent); color: #fff; border-radius: 12px; padding: 14px 16px; }
+  .result .est { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .result.error { box-shadow: 6px 6px 0 var(--bad); border-color: var(--bad); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 980px; margin: 36px auto 0; text-align: left; }
+  .stat { background: var(--paper); border-radius: 14px; padding: 16px 18px; border: 1px solid var(--line); }
+  .stat b { display: block; font-family: "Bricolage Grotesque", sans-serif; font-size: 34px; line-height: 1.1; }
+  .stat small { color: var(--muted); font-size: 13px; }
+  .stat.wide { grid-column: 1 / -1; display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .stat.wide span { font-weight: 600; }
+  .fine { font-size: 12px; margin: 18px auto 0 !important; max-width: 680px !important; }
+  @media (max-width: 860px) {
+    .checker { grid-template-columns: 1fr; }
+    .result .row { grid-template-columns: 1fr auto; }
+    .result .row .note { grid-column: 1 / -1; }
+    .result .row .tag { justify-self: start; }
+    .stats { grid-template-columns: 1fr; }
+  }
+
   /* Who + FAQ */
   .persona { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: center; }
   .persona ul { list-style: none; }
@@ -383,8 +416,31 @@
   <div class="wrap">
     <div class="try">
       <h2>Try Asli on a product you buy</h2>
-      <p>Type a product and brand you actually reorder. The live checker is rolling out to early users this week.</p>
-      <a href="#faq" class="btn">Coming this week</a>
+      <p>Type a product and brand you actually reorder. You'll get a quick estimate on our four checks, each with a confidence level.</p>
+
+      <form id="checker" class="checker" autocomplete="off">
+        <label>Product<input id="f-product" maxlength="80" placeholder="e.g. Matic liquid detergent 1L" required></label>
+        <label>Brand<input id="f-brand" maxlength="60" placeholder="e.g. Surf Excel" required></label>
+        <label>Category
+          <select id="f-category">
+            <option>Laundry detergent</option><option>Dishwash</option><option>Floor cleaner</option>
+            <option>Hand wash</option><option>Body wash</option><option>Shampoo</option>
+            <option>Other household / personal care</option>
+          </select>
+        </label>
+        <button class="btn" id="f-submit" type="submit">Check it</button>
+      </form>
+      <p class="quota" id="quota">5 free checks per visitor in this preview.</p>
+
+      <div id="result" class="result" hidden aria-live="polite"></div>
+
+      <div class="stats" id="stats">
+        <div class="stat"><b id="s-total">–</b><small>products checked so far</small></div>
+        <div class="stat"><b id="s-brands">–</b><small>different brands looked up</small></div>
+        <div class="stat"><b id="s-weak">–</b><small>had green claims rated vague or unproven</small></div>
+        <div class="stat wide"><small>Most-checked brands</small><span id="s-top">–</span></div>
+      </div>
+      <p class="fine">Estimates from public information using Google Gemini, not lab tests or live prices. Asli never certifies products. Every check is stored anonymously to improve Asli; no names or emails are collected.</p>
     </div>
   </div>
 </section>
@@ -427,5 +483,86 @@
   </div>
 </footer>
 
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function visitorId() {
+    let id = null;
+    try { id = localStorage.getItem('asli_vid'); } catch (e) {}
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+      try { localStorage.setItem('asli_vid', id); } catch (e) {}
+    }
+    return id;
+  }
+  const vid = visitorId();
+
+  let statsSeq = 0;
+  async function loadStats() {
+    const seq = ++statsSeq;
+    try {
+      const s = await (await fetch('/api/stats', { cache: 'no-store' })).json();
+      if (s.error || seq !== statsSeq) return;
+      $('s-total').textContent = s.totalChecks.toLocaleString('en-IN');
+      $('s-brands').textContent = s.brandsChecked.toLocaleString('en-IN');
+      $('s-weak').textContent = s.weakClaimShare == null ? '–' : s.weakClaimShare + '%';
+      $('s-top').textContent = s.topBrands.length ? s.topBrands.map((b) => `${b.name} (${b.n})`).join(' · ') : 'Be the first to check one';
+    } catch (e) {}
+  }
+
+  function dots(score) {
+    if (score == null) return '<span class="dots"><span class="off">●●●●●</span></span>';
+    return `<span class="dots" aria-label="${score} out of 5">${'●'.repeat(score)}<span class="off">${'●'.repeat(5 - score)}</span></span>`;
+  }
+  const confTag = { High: 'ok', Medium: 'vague', Low: 'bad' };
+  const claimTag = { Specific: 'ok', 'Partly backed': 'vague', Vague: 'bad', 'Not enough evidence': 'bad' };
+
+  function render(product, brand, r) {
+    const rows = (r.checks || []).map((c) => `
+      <div class="row">
+        <b>${esc(c.name)}</b>${dots(c.score)}
+        <span class="note">${esc(c.note)}</span>
+        <span class="tag ${confTag[c.confidence] || 'vague'}">${esc(c.confidence)} confidence</span>
+      </div>`).join('');
+    return `
+      <div class="head"><h3>${esc(brand)} · ${esc(product)}</h3><span class="tag ${claimTag[r.claim_rating] || 'vague'}">Claims: ${esc(r.claim_rating)}</span></div>
+      <p style="font-weight:600;margin:8px 0 4px">${esc(r.verdict)}</p>
+      ${rows}
+      <div class="tip"><b>Switch tip:</b> ${esc(r.switch_tip)}</div>
+      <p class="est">Estimate only, based on public information, not lab testing or live prices. Asli does not certify products.</p>`;
+  }
+
+  $('checker').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const product = $('f-product').value.trim();
+    const brand = $('f-brand').value.trim();
+    const category = $('f-category').value;
+    const out = $('result');
+    const btn = $('f-submit');
+    btn.disabled = true; btn.textContent = 'Checking…';
+    out.hidden = false; out.className = 'result'; out.innerHTML = '<p>Reading the label so you don\'t have to…</p>';
+    try {
+      const res = await fetch('/api/score', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product, brand, category, visitorId: vid }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+      out.innerHTML = render(product, brand, data.result);
+      $('quota').textContent = data.remaining > 0 ? `${data.remaining} free check${data.remaining === 1 ? '' : 's'} left in this preview.` : 'That was your last free check in this preview.';
+      loadStats();
+    } catch (err) {
+      out.className = 'result error';
+      out.innerHTML = `<p>${esc(err.message)}</p>`;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Check it';
+    }
+  });
+
+  loadStats();
+})();
+</script>
 </body>
 </html>
