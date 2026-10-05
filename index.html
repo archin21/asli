@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 <title>Asli: Check the green claims before you reorder</title>
 <meta name="description" content="Asli checks which green claims on household products are real, and finds the one switch that cuts plastic without costing more per use.">
 <meta property="og:title" content="Asli: Green claims, checked">
@@ -27,6 +28,25 @@
     --bad: #B42318;
     --bad-soft: #FBE1DE;
     --radius: 18px;
+    --on-ink: #FFFFFF;
+    --on-accent: #FFFFFF;
+    --band: #151515;
+    --on-band: #F4F1EA;
+    --on-band-muted: #B9B4A9;
+    --band-line: #4A4740;
+    --band-line-soft: #3A3833;
+    --nav-bg: rgba(250,246,238,0.92);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121110; --paper: #1C1B19; --ink: #F2EFE8; --muted: #A9A49A; --line: #34322E;
+      --accent: #4CB872; --accent-soft: #1C3123; --warn: #F2A851; --warn-soft: #3A2B15;
+      --bad: #F07A70; --bad-soft: #3E1D1A; --on-ink: #121110; --on-accent: #0D1A11;
+      --band: #1E1D1A; --on-band: #F2EFE8; --on-band-muted: #A9A49A; --band-line: #45423C; --band-line-soft: #34322E;
+      --nav-bg: rgba(18,17,16,0.9);
+      color-scheme: dark;
+    }
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -43,22 +63,22 @@
   .wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
 
   /* Nav */
-  nav { position: sticky; top: 0; z-index: 10; background: rgba(250,246,238,0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  nav { position: sticky; top: 0; z-index: 10; background: var(--nav-bg); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
   nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
   .logo { font-size: 28px; font-weight: 800; text-decoration: none; }
   .logo span { color: var(--accent); }
   .nav-links { display: flex; gap: 28px; align-items: center; font-size: 15px; font-weight: 500; }
   .nav-links a { text-decoration: none; color: var(--muted); }
   .nav-links a:hover { color: var(--ink); }
-  .nav-links a.btn, .nav-links a.btn:hover { color: #fff; }
+  .nav-links a.btn, .nav-links a.btn:hover { color: var(--on-ink); }
   .btn {
-    display: inline-block; background: var(--ink); color: #fff; text-decoration: none;
+    display: inline-block; background: var(--ink); color: var(--on-ink); text-decoration: none;
     padding: 14px 24px; border-radius: 999px; font-weight: 600; font-size: 16px; border: 2px solid var(--ink);
     transition: transform .15s ease, background .15s ease;
   }
-  .btn:hover { transform: translateY(-2px); background: var(--accent); border-color: var(--accent); }
+  .btn:hover { transform: translateY(-2px); background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
   .btn.ghost { background: transparent; color: var(--ink); }
-  .btn.ghost:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn.ghost:hover { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
   .btn.sm { padding: 9px 18px; font-size: 14px; }
 
   /* Hero */
@@ -89,7 +109,7 @@
   .metric { background: var(--bg); border-radius: 12px; padding: 12px; }
   .metric small { display: block; color: var(--muted); font-size: 12px; }
   .metric b { font-size: 20px; font-family: "Bricolage Grotesque", sans-serif; }
-  .verdict { background: var(--accent); color: #fff; border-radius: 12px; padding: 14px 16px; font-size: 15px; }
+  .verdict { background: var(--accent); color: var(--on-accent); border-radius: 12px; padding: 14px 16px; font-size: 15px; }
   .verdict b { display: block; font-size: 16px; margin-bottom: 2px; }
   .illus { margin-top: 12px; font-size: 12px; color: var(--muted); text-align: center; }
 
@@ -98,12 +118,12 @@
   .section-head { max-width: 680px; margin-bottom: 48px; }
   .section-head h2 { font-size: clamp(32px, 4.4vw, 50px); font-weight: 800; margin-bottom: 14px; }
   .section-head p { color: var(--muted); font-size: 19px; }
-  .dark { background: var(--ink); color: #F4F1EA; }
-  .dark .section-head p, .dark .muted { color: #B9B4A9; }
+  .dark { background: var(--band); color: var(--on-band); }
+  .dark .section-head p, .dark .muted { color: var(--on-band-muted); }
 
   /* Problem */
   .labels { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 40px; }
-  .labels span { font-family: "Bricolage Grotesque", sans-serif; font-size: clamp(20px, 2.6vw, 30px); font-weight: 700; padding: 8px 20px; border: 2px solid #4A4740; border-radius: 999px; }
+  .labels span { font-family: "Bricolage Grotesque", sans-serif; font-size: clamp(20px, 2.6vw, 30px); font-weight: 700; padding: 8px 20px; border: 2px solid var(--band-line); border-radius: 999px; }
   .labels span:nth-child(odd) { transform: rotate(-2deg); }
   .labels span:nth-child(even) { transform: rotate(1.5deg); }
   .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
@@ -126,15 +146,15 @@
 
   /* Rules */
   .rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 40px; }
-  .rule { display: flex; gap: 14px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid #3A3833; }
-  .rule .x { flex: none; width: 30px; height: 30px; border-radius: 50%; background: #F4F1EA; color: var(--ink); display: grid; place-items: center; font-weight: 800; font-size: 15px; }
+  .rule { display: flex; gap: 14px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--band-line-soft); }
+  .rule .x { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--on-band); color: var(--band); display: grid; place-items: center; font-weight: 800; font-size: 15px; }
   .rule h3 { font-size: 19px; margin-bottom: 4px; }
   .rule p { font-size: 15px; }
 
   /* Launch note */
   .note-card { background: var(--paper); border: 2px solid var(--ink); border-radius: var(--radius); padding: 40px; max-width: 760px; margin: 0 auto; box-shadow: 8px 8px 0 var(--accent); }
   .note-card .who { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-  .avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 800; font-family: "Bricolage Grotesque", sans-serif; font-size: 20px; }
+  .avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-weight: 800; font-family: "Bricolage Grotesque", sans-serif; font-size: 20px; }
   .who small { display: block; color: var(--muted); font-size: 13px; }
   .note-body p { margin-bottom: 14px; white-space: pre-line; }
 
@@ -159,7 +179,7 @@
   .dots { letter-spacing: 3px; color: var(--accent); font-size: 15px; white-space: nowrap; }
   .dots .off { color: var(--line); }
   .result .premium { margin-top: 14px; background: var(--warn-soft); color: var(--ink); border-radius: 12px; padding: 14px 16px; }
-  .result .tip { margin-top: 14px; background: var(--accent); color: #fff; border-radius: 12px; padding: 14px 16px; }
+  .result .tip { margin-top: 14px; background: var(--accent); color: var(--on-accent); border-radius: 12px; padding: 14px 16px; }
   .result .est { margin-top: 10px; font-size: 13px; color: var(--muted); }
   .result.error { box-shadow: 6px 6px 0 var(--bad); border-color: var(--bad); }
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 980px; margin: 36px auto 0; text-align: left; }
@@ -177,6 +197,31 @@
     .stats { grid-template-columns: 1fr; }
   }
 
+  /* Polish: chips, share, loading, reveal, founder */
+  section[id] { scroll-margin-top: 72px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+  .chips span { font-size: 13px; color: var(--muted); align-self: center; margin-right: 2px; }
+  .chip { font: inherit; font-size: 13px; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--accent); background: var(--paper); color: var(--accent); cursor: pointer; transition: background .15s, color .15s; }
+  .chip:hover, .chip:focus-visible { background: var(--accent); color: var(--on-accent); }
+  .share { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .share button, .share a { font: inherit; font-size: 14px; font-weight: 600; padding: 9px 16px; border-radius: 999px; border: 2px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; text-decoration: none; }
+  .share button:hover, .share a:hover { background: var(--ink); color: var(--on-ink); }
+  .loading { display: flex; align-items: center; gap: 14px; }
+  .spinner { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--accent-soft); border-top-color: var(--accent); animation: spin .8s linear infinite; flex: none; }
+  .skel { height: 12px; border-radius: 6px; background: var(--line); margin-top: 12px; animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 50% { opacity: .45; } }
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } .spinner, .skel { animation: none; } html { scroll-behavior: auto; } }
+  .founder { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: start; max-width: 820px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 32px; }
+  .founder .avatar { width: 76px; height: 76px; font-size: 30px; }
+  .founder blockquote { font-family: "Bricolage Grotesque", sans-serif; font-size: clamp(20px, 2.4vw, 26px); font-weight: 700; line-height: 1.3; margin: 6px 0 14px; }
+  .founder .who b { font-size: 17px; }
+  .founder .who p { color: var(--muted); font-size: 15px; }
+  .founder .links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  @media (max-width: 860px) { .founder { grid-template-columns: 1fr; padding: 24px 20px; } }
+
   /* Who + FAQ */
   .persona { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 48px; align-items: center; }
   .persona ul { list-style: none; }
@@ -191,9 +236,9 @@
   /* CTA + footer */
   .cta { text-align: center; }
   .cta h2 { font-size: clamp(36px, 5.4vw, 64px); font-weight: 800; margin-bottom: 18px; }
-  .cta p { color: #B9B4A9; font-size: 19px; margin-bottom: 32px; }
-  .cta .btn { background: #F4F1EA; color: var(--ink); border-color: #F4F1EA; }
-  .cta .btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .cta p { color: var(--on-band-muted); font-size: 19px; margin-bottom: 32px; }
+  .cta .btn { background: var(--on-band); color: var(--band); border-color: var(--on-band); }
+  .cta .btn:hover { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
   footer { padding: 32px 0; font-size: 14px; color: var(--muted); }
   footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
@@ -417,8 +462,8 @@
   <div class="wrap">
     <div class="note-card">
       <div class="who">
-        <div class="avatar">A</div>
-        <div><b>From the founders</b><small>Launch note</small></div>
+        <div class="avatar">AG</div>
+        <div><b>From the founder</b><small>Launch note · Archin Gupta</small></div>
       </div>
       <!-- Final Task 2 launch post (Claude cross-model version), adapted only in the last line for the page -->
       <div class="note-body">
@@ -452,6 +497,14 @@
         </label>
         <button class="btn" id="f-submit" type="submit">Check it</button>
       </form>
+      <div class="chips" aria-label="Example products">
+        <span>Try one:</span>
+        <button type="button" class="chip" data-p="Matic liquid detergent 1L" data-b="Surf Excel" data-c="Laundry detergent">Surf Excel Matic</button>
+        <button type="button" class="chip" data-p="Onion hair fall shampoo 250ml" data-b="Mamaearth" data-c="Shampoo">Mamaearth shampoo</button>
+        <button type="button" class="chip" data-p="Lemon dishwash gel 750ml" data-b="Pril" data-c="Dishwash">Pril dishwash</button>
+        <button type="button" class="chip" data-p="Disinfectant floor cleaner 975ml" data-b="Lizol" data-c="Floor cleaner">Lizol floor cleaner</button>
+        <button type="button" class="chip" data-p="Deeply nourishing body wash 250ml" data-b="Dove" data-c="Body wash">Dove body wash</button>
+      </div>
       <p class="quota" id="quota">5 free checks per visitor in this preview.</p>
 
       <div id="result" class="result" hidden aria-live="polite"></div>
@@ -480,11 +533,16 @@
 
 <section id="team" style="padding-top:0">
   <div class="wrap">
-    <div class="team">
-      <div class="avatar">AG</div>
+    <div class="section-head"><h2>Why I built Asli</h2></div>
+    <div class="founder">
+      <div class="avatar" aria-hidden="true">AG</div>
       <div>
-        <h3>Built by Archin Gupta</h3>
-        <p>MBA candidate at ISB, aspiring to build a career in software product management.</p>
+        <blockquote>"I kept paying extra for 'natural' and 'eco' products. Then I realised I couldn't say what the extra money actually bought me. Asli is the check I wanted before every reorder."</blockquote>
+        <div class="who">
+          <b>Archin Gupta</b>
+          <p>MBA candidate at ISB, aspiring to build a career in software product management. Asli is my end-to-end product build: research, AI ideation, design, a live Gemini-powered checker and data.</p>
+        </div>
+        <div class="links" id="founder-links"><!-- FOUNDER_LINKS --></div>
       </div>
     </div>
   </div>
@@ -557,6 +615,49 @@
       <p class="est">Estimate only, based on public information, not lab testing or live prices. Asli does not certify products.</p>`;
   }
 
+  const SITE = 'https://asli-check.vercel.app';
+  function shareText(product, brand, r) {
+    return `Asli checked ${brand} ${product}: green claims "${r.claim_rating}". ${r.verdict} Switch tip: ${r.switch_tip} Check yours: ${SITE}`;
+  }
+  function shareBar(product, brand, r) {
+    const wa = 'https://wa.me/?text=' + encodeURIComponent(shareText(product, brand, r));
+    return `<div class="share"><a href="${wa}" target="_blank" rel="noopener">Share on WhatsApp</a><button type="button" id="copy-result">Copy result</button>${navigator.share ? '<button type="button" id="native-share">Share…</button>' : ''}</div>`;
+  }
+  function wireShare(product, brand, r) {
+    const text = shareText(product, brand, r);
+    const copy = $('copy-result');
+    if (copy) copy.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(text); copy.textContent = 'Copied ✓'; } catch (e) { copy.textContent = 'Copy failed'; }
+      setTimeout(() => { copy.textContent = 'Copy result'; }, 2000);
+    });
+    const ns = $('native-share');
+    if (ns) ns.addEventListener('click', () => navigator.share({ title: 'Asli result', text }).catch(() => {}));
+  }
+
+  document.querySelectorAll('.chip').forEach((chip) => chip.addEventListener('click', () => {
+    $('f-product').value = chip.dataset.p;
+    $('f-brand').value = chip.dataset.b;
+    $('f-category').value = chip.dataset.c;
+    $('checker').requestSubmit();
+  }));
+
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const targets = document.querySelectorAll('.section-head, .grid3 > *, .grid2 > *, .rule, .whynow, .founder, .note-card, .persona ul');
+    targets.forEach((el) => el.classList.add('reveal'));
+    let queued = false;
+    const reveal = () => {
+      queued = false;
+      document.querySelectorAll('.reveal:not(.in)').forEach((el) => {
+        if (el.getBoundingClientRect().top < innerHeight * 0.92) el.classList.add('in'); // includes anything already scrolled past
+      });
+    };
+    const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(reveal); } };
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll);
+    addEventListener('load', reveal);
+    reveal();
+  }
+
   $('checker').addEventListener('submit', async (e) => {
     e.preventDefault();
     const product = $('f-product').value.trim();
@@ -565,7 +666,11 @@
     const out = $('result');
     const btn = $('f-submit');
     btn.disabled = true; btn.textContent = 'Checking…';
-    out.hidden = false; out.className = 'result'; out.innerHTML = '<p>Reading the label so you don\'t have to…</p>';
+    out.hidden = false; out.className = 'result';
+    out.innerHTML = '<div class="loading"><div class="spinner"></div><b id="load-msg">Reading the label so you don\'t have to…</b></div><div class="skel" style="width:90%"></div><div class="skel" style="width:75%"></div><div class="skel" style="width:82%"></div>';
+    const msgs = ['Sorting specific claims from vague ones…', 'Working out plastic per use…', 'Checking what the green premium buys…', 'Looking for a switch that doesn\'t cost more…'];
+    let mi = 0;
+    const ticker = setInterval(() => { const m = $('load-msg'); if (m) m.textContent = msgs[mi++ % msgs.length]; else clearInterval(ticker); }, 1100);
     try {
       const res = await fetch('/api/score', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -573,10 +678,14 @@
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong.');
-      out.innerHTML = render(product, brand, data.result);
+      clearInterval(ticker);
+      out.innerHTML = render(product, brand, data.result) + shareBar(product, brand, data.result);
+      wireShare(product, brand, data.result);
+      out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       $('quota').textContent = data.remaining > 0 ? `${data.remaining} free check${data.remaining === 1 ? '' : 's'} left in this preview.` : 'That was your last free check in this preview.';
       loadStats();
     } catch (err) {
+      clearInterval(ticker);
       out.className = 'result error';
       out.innerHTML = `<p>${esc(err.message)}</p>`;
     } finally {
