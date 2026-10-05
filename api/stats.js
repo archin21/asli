@@ -9,9 +9,11 @@ export default async function handler(req, res) {
 
     const counts = {};
     for (const r of known) {
-      const name = r.brand.trim().replace(/\s+/g, ' ');
+      let name = r.brand.trim().replace(/\s+/g, ' ');
+      if (name === name.toLowerCase()) name = name.replace(/\b\w/g, (c) => c.toUpperCase());
       const key = name.toLowerCase();
       counts[key] = counts[key] || { name, n: 0 };
+      if (counts[key].name === counts[key].name.toLowerCase()) counts[key].name = name;
       counts[key].n += 1;
     }
     const topBrands = Object.values(counts).sort((a, b) => b.n - a.n).slice(0, 5);
