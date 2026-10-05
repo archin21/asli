@@ -56,6 +56,19 @@ function clean(value, max) {
   return String(value ?? '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max);
 }
 
+const CACHE_DAYS = 7;
+const norm = (t) => t.toLowerCase().replace(/\s+/g, ' ').trim();
+
+// Latest Gemini answer (not itself a cache hit) for the same product + brand + category in the last week.
+async function findCached(product, brand, category) {
+  const since = new Date(Date.now() - CACHE_DAYS * 864e5).toISOString();
+  const rows = await (await supabase(
+    `lookups?select=product,brand,output,created_at&category=eq.${encodeURIComponent(category)}` +
+      `&model=not.like.cache*&created_at=gte.${since}&order=created_at.desc&limit=200`,
+  )).json();
+  return rows.find((r) => r.output && norm(r.product) === norm(product) && norm(r.brand) === norm(brand)) || null;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST' });
 
@@ -78,34 +91,41 @@ export default async function handler(req, res) {
     }
 
     const input = `Product: ${product}\nBrand: ${brand}\nCategory: ${category}`;
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env('GEMINI_API_KEY') },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: [{ role: 'user', parts: [{ text: input }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: MAX_OUTPUT_TOKENS,
-            thinkingConfig: { thinkingLevel: 'minimal' }, // keep the 300-token budget for the answer
-            responseMimeType: 'application/json',
-            responseSchema: RESPONSE_SCHEMA,
-          },
-        }),
-      },
-    );
-    if (!geminiRes.ok) throw new Error(`Gemini ${geminiRes.status}: ${await geminiRes.text()}`);
-    const data = await geminiRes.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    // Consistency: reuse the most recent fresh answer for the same product, brand and category.
+    const cached = await findCached(product, brand, category);
     let result;
-    try {
-      result = JSON.parse(text);
-    } catch {
-      throw new Error(`Gemini returned unreadable output (finishReason: ${data.candidates?.[0]?.finishReason})`);
+    let usage = {};
+    if (cached) {
+      result = cached.output;
+    } else {
+      const geminiRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env('GEMINI_API_KEY') },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            contents: [{ role: 'user', parts: [{ text: input }] }],
+            generationConfig: {
+              temperature: 0.2,
+              maxOutputTokens: MAX_OUTPUT_TOKENS,
+              thinkingConfig: { thinkingLevel: 'minimal' }, // spend the token budget on the answer, not on thinking
+              responseMimeType: 'application/json',
+              responseSchema: RESPONSE_SCHEMA,
+            },
+          }),
+        },
+      );
+      if (!geminiRes.ok) throw new Error(`Gemini ${geminiRes.status}: ${await geminiRes.text()}`);
+      const data = await geminiRes.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      try {
+        result = JSON.parse(text);
+      } catch {
+        throw new Error(`Gemini returned unreadable output (finishReason: ${data.candidates?.[0]?.finishReason})`);
+      }
+      usage = data.usageMetadata || {};
     }
-    const usage = data.usageMetadata || {};
 
     await supabase('lookups', {
       method: 'POST',
@@ -120,13 +140,17 @@ export default async function handler(req, res) {
         verdict: clean(result.verdict, 120),
         claim_rating: result.claim_rating,
         known_brand: Boolean(result.known_brand),
-        input_tokens: usage.promptTokenCount ?? null,
-        output_tokens: usage.candidatesTokenCount ?? null,
-        model: MODEL,
+        input_tokens: cached ? 0 : usage.promptTokenCount ?? null,
+        output_tokens: cached ? 0 : usage.candidatesTokenCount ?? null,
+        model: cached ? `cache:${MODEL}` : MODEL,
       },
     });
 
-    return res.status(200).json({ result, remaining: MAX_REQUESTS_PER_VISITOR - used - 1 });
+    return res.status(200).json({
+      result,
+      remaining: MAX_REQUESTS_PER_VISITOR - used - 1,
+      cachedFrom: cached ? cached.created_at : null,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Something went wrong checking that product. Please try again in a minute.' });

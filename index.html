@@ -90,6 +90,11 @@
   .hero h1 .strike::after { content: ""; position: absolute; left: -4px; right: -4px; top: 52%; height: 6px; background: var(--bad); transform: rotate(-3deg); border-radius: 4px; }
   .hero p.lede { font-size: 20px; color: var(--muted); max-width: 540px; margin-bottom: 32px; }
   .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+  .live-proof { display: inline-flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 14px; font-weight: 600; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; }
+  .live-proof .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 var(--accent); animation: live 2s ease-out infinite; flex: none; }
+  @keyframes live { 0% { box-shadow: 0 0 0 0 rgba(30,107,58,.5); } 100% { box-shadow: 0 0 0 10px rgba(30,107,58,0); } }
+  @media (prefers-reduced-motion: reduce) { .live-proof .dot { animation: none; } }
+  .result .cached { margin-top: 10px; font-size: 13px; color: var(--muted); }
   .hero-note { margin-top: 18px; font-size: 14px; color: var(--muted); }
 
   /* Verdict card */
@@ -291,6 +296,7 @@
         <a href="#how" class="btn ghost">See how it works</a>
       </div>
       <p class="hero-note">No eco-score. No paid rankings. If there's no better option, we'll tell you to keep what you have.</p>
+      <p class="live-proof" id="hero-proof" hidden><span class="dot" aria-hidden="true"></span><span id="hero-proof-text"></span></p>
     </div>
 
     <div class="card" aria-label="Example Asli result">
@@ -588,6 +594,11 @@
       $('s-total').textContent = s.totalChecks.toLocaleString('en-IN');
       $('s-brands').textContent = s.brandsChecked.toLocaleString('en-IN');
       $('s-weak').textContent = s.weakClaimShare == null ? '–' : s.weakClaimShare + '%';
+      if (s.totalChecks > 0) {
+        $('hero-proof-text').textContent = `Live: ${s.totalChecks.toLocaleString('en-IN')} products checked so far` +
+          (s.weakClaimShare == null ? '' : ` · ${s.weakClaimShare}% had vague or unproven green claims`);
+        $('hero-proof').hidden = false;
+      }
       $('s-top').textContent = s.topBrands.length ? s.topBrands.map((b) => `${b.name} (${b.n})`).join(' · ') : 'Be the first to check one';
     } catch (e) {}
   }
@@ -679,7 +690,8 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong.');
       clearInterval(ticker);
-      out.innerHTML = render(product, brand, data.result) + shareBar(product, brand, data.result);
+      const cachedNote = data.cachedFrom ? `<p class="cached">Same answer as a check on ${new Date(data.cachedFrom).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}. Asli reuses recent answers so the same product always gets the same result.</p>` : '';
+      out.innerHTML = render(product, brand, data.result) + cachedNote + shareBar(product, brand, data.result);
       wireShare(product, brand, data.result);
       out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       $('quota').textContent = data.remaining > 0 ? `${data.remaining} free check${data.remaining === 1 ? '' : 's'} left in this preview.` : 'That was your last free check in this preview.';
