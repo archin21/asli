@@ -16,7 +16,8 @@ export async function supabase(path, { method = 'GET', body, headers = {} } = {}
     method,
     headers: {
       apikey: key,
-      Authorization: `Bearer ${key}`,
+      // Legacy service_role keys are JWTs and go in Authorization too; new sb_secret_ keys go only in apikey.
+      ...(key.startsWith('eyJ') ? { Authorization: `Bearer ${key}` } : {}),
       'Content-Type': 'application/json',
       ...headers,
     },
