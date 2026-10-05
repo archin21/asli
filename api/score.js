@@ -15,7 +15,7 @@ Given a product, brand and category, return a quick ESTIMATE on Asli's four chec
 2. Plastic per use: how much packaging plastic per wash/dose compared with typical alternatives; refills, concentrates and bigger packs score higher.
 3. Cost per use: price per wash/dose versus typical alternatives in India.
 4. Switch friction: how easy it is to move to a lower-plastic option (5 = same brand refill/bigger pack readily on Blinkit/Zepto/Amazon).
-Also give claim_rating for the claims overall, a verdict of max 6 words. Be concise: the whole answer must fit in about 200 words, and one practical switch_tip (max 18 words), which may be "Keep what you have" when no switch is clearly better.
+Also give claim_rating for the claims overall, a verdict of max 6 words, and one practical switch_tip (max 18 words), which may be "Keep what you have" when no switch is clearly better. Be concise: the whole answer must fit in about 200 words.
 
 RULES (never break these):
 - Every score is an estimate from general public knowledge, not lab testing or a live price check. Use Low confidence whenever unsure. Never state precise numbers (grams, rupees, percentages) as fact.
