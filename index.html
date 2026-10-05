@@ -94,7 +94,8 @@
   .live-proof .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 var(--accent); animation: live 2s ease-out infinite; flex: none; }
   @keyframes live { 0% { box-shadow: 0 0 0 0 rgba(30,107,58,.5); } 100% { box-shadow: 0 0 0 10px rgba(30,107,58,0); } }
   @media (prefers-reduced-motion: reduce) { .live-proof .dot { animation: none; } }
-  .result .cached { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .try .result p { max-width: none; margin-left: 0; margin-right: 0; }
+  .result .cached { margin: 4px 0 0;  font-size: 13px; color: var(--muted); }
   .hero-note { margin-top: 18px; font-size: 14px; color: var(--muted); }
 
   /* Verdict card */
@@ -185,7 +186,7 @@
   .dots .off { color: var(--line); }
   .result .premium { margin-top: 14px; background: var(--warn-soft); color: var(--ink); border-radius: 12px; padding: 14px 16px; }
   .result .tip { margin-top: 14px; background: var(--accent); color: var(--on-accent); border-radius: 12px; padding: 14px 16px; }
-  .result .est { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .result .est { margin: 12px 0 0;  font-size: 13px; color: var(--muted); }
   .result.error { box-shadow: 6px 6px 0 var(--bad); border-color: var(--bad); }
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 980px; margin: 36px auto 0; text-align: left; }
   .stat { background: var(--paper); border-radius: 14px; padding: 16px 18px; border: 1px solid var(--line); }
@@ -595,8 +596,8 @@
       $('s-brands').textContent = s.brandsChecked.toLocaleString('en-IN');
       $('s-weak').textContent = s.weakClaimShare == null ? '–' : s.weakClaimShare + '%';
       if (s.totalChecks > 0) {
-        $('hero-proof-text').textContent = `Live: ${s.totalChecks.toLocaleString('en-IN')} products checked so far` +
-          (s.weakClaimShare == null ? '' : ` · ${s.weakClaimShare}% had vague or unproven green claims`);
+        $('hero-proof-text').textContent = `Live: ${s.totalChecks.toLocaleString('en-IN')} products checked` +
+          (s.weakClaimShare == null ? '' : ` · ${s.weakClaimShare}% with vague green claims`);
         $('hero-proof').hidden = false;
       }
       $('s-top').textContent = s.topBrands.length ? s.topBrands.map((b) => `${b.name} (${b.n})`).join(' · ') : 'Be the first to check one';
