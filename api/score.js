@@ -4,7 +4,7 @@
 import { MAX_REQUESTS_PER_VISITOR, countForVisitor, env, supabase } from './_lib.js';
 
 const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
-const MAX_OUTPUT_TOKENS = 350;
+const MAX_OUTPUT_TOKENS = 380;
 const CATEGORIES = ['Laundry detergent', 'Dishwash', 'Floor cleaner', 'Hand wash', 'Body wash', 'Shampoo', 'Other household / personal care'];
 const CRITERIA = ['Claim integrity', 'Plastic per use', 'Cost per use', 'Switch friction'];
 
@@ -15,7 +15,7 @@ Given a product, brand and category, return a quick ESTIMATE on Asli's four chec
 2. Plastic per use: how much packaging plastic per wash/dose compared with typical alternatives; refills, concentrates and bigger packs score higher.
 3. Cost per use: price per wash/dose versus typical alternatives in India.
 4. Switch friction: how easy it is to move to a lower-plastic option (5 = same brand refill/bigger pack readily on Blinkit/Zepto/Amazon).
-Also give claim_rating for the claims overall, a verdict of max 6 words, and one practical switch_tip (max 18 words), which may be "Keep what you have" when no switch is clearly better. Be concise: the whole answer must fit in about 200 words.
+Also give premium_check (max 16 words): an ESTIMATE of whether shoppers pay extra for this product's green or natural positioning versus a typical conventional product of the same type, and whether anything specific on the pack justifies that extra (e.g. a refill format or a specific, referenced claim). Never state exact prices. Then give claim_rating for the claims overall, a verdict of max 6 words, and one practical switch_tip (max 18 words), which may be "Keep what you have" when no switch is clearly better. Be concise: the whole answer must fit in about 200 words.
 
 RULES (never break these):
 - Every score is an estimate from general public knowledge, not lab testing or a live price check. Use Low confidence whenever unsure. Never state precise numbers (grams, rupees, percentages) as fact.
@@ -45,10 +45,11 @@ const RESPONSE_SCHEMA = {
         required: ['name', 'score', 'confidence', 'note'],
       },
     },
+    premium_check: { type: 'STRING' },
     switch_tip: { type: 'STRING' },
   },
-  required: ['known_brand', 'verdict', 'claim_rating', 'checks', 'switch_tip'],
-  propertyOrdering: ['known_brand', 'verdict', 'claim_rating', 'checks', 'switch_tip'],
+  required: ['known_brand', 'verdict', 'claim_rating', 'checks', 'premium_check', 'switch_tip'],
+  propertyOrdering: ['known_brand', 'verdict', 'claim_rating', 'checks', 'premium_check', 'switch_tip'],
 };
 
 function clean(value, max) {
